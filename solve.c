@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <omp.h>
 #include "printing.h"
 
 //Wybiera wiersz, który ma element na pozycji start ,który jest najwiekszy
