@@ -25,7 +25,7 @@ void partial_choose(double **matrix, int rows, int column, int sub_matrix_size) 
 
 //Wybiera największy element z całej podmacierzy i przestawia wiersz i kolumnę
 void full_choose(double **matrix, int rows, int columns, int sub_matrix_size, int *pv) {
-	int max_i, max_j, start = rows - sub_matrix_size;
+	int i, j, max_i, max_j, start = rows - sub_matrix_size;
 	double max_v;
 
 	if (start >= rows) return;
@@ -34,17 +34,13 @@ void full_choose(double **matrix, int rows, int columns, int sub_matrix_size, in
 	max_i = start;
 	max_j = start;
 	
-#pragma omp parallel default(none) private(i, j) firstprivate(rows, columns, sub_matrix_size, max_i, max_j, max_v) shared(matrix, pv) {
-		int i, j;
-
-#pragma omp for private(i, j) schedule(static) collapse(2) reduction(max: max_v, max_i, max_j)
-		for (i = start; i < rows; i++) {
-			for (j = start; j < columns - 1; j++) { //wyraz wolny nie jest brany pod uwagę
-				if (max_v < matrix[i][j]) {
-					max_i = i;
-					max_j = j;
-					max_v = matrix[i][j];
-				}
+#pragma omp parallel for schedule(static) collapse(2) reduction(max: max_v, max_j, max_i) default(none) shared(matrix, rows, columns, sub_matrix_size, pv, start) private(i, j)
+	for (i = start; i < rows; i++) {
+		for (j = start; j < columns - 1; j++) { //wyraz wolny nie jest brany pod uwagę
+			if (max_v < matrix[i][j]) {
+				max_i = i;
+				max_j = j;
+				max_v = matrix[i][j];
 			}
 		}
 	}
