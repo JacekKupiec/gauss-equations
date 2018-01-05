@@ -26,40 +26,76 @@ void partial_choose(double **matrix, int rows, int column, int sub_matrix_size) 
 
 //Wybiera największy element z całej podmacierzy i przestawia wiersz i kolumnę
 void full_choose(double **matrix, int rows, int columns, int sub_matrix_size, int *pv) {
-	int max_i, max_j, start = rows - sub_matrix_size;
+	int i, j, max_i, max_j, start = rows - sub_matrix_size;
 	double max_v;
 
 	if (start >= rows) return;
 
-	max_v = matrix[start][start]; 
-	max_i = start;
-	max_j = start;
+	for (i = start, max_v = matrix[start][start], max_i = start, max_j = start; i < rows; i++) {
+		for (j = start; j < columns - 1; j++) { //wyraz wolny nie jest brany pod uwagę
+			if (max_v < matrix[i][j]) {
+				max_i = i;
+				max_j = j;
+				max_v = matrix[i][j];
+			}
+		}
+	}
 
-#pragma omp parallel default(none) shared(matrix, rows, columns, sub_matrix_size, pv) 
+	if (matrix[start][start] < matrix[max_i][max_j]) {
+		//przesuwam wiersz z maximum na górę
+		if (matrix[start] != matrix[max_i]) {
+			double *tmp = matrix[start];
+
+			matrix[start] = matrix[max_i];
+			matrix[max_i] = tmp;
+		}
+
+		//przesuwam kolumnę zawierającą maksimum na początek
+		if (start != max_j) {
+			int tmp = pv[start];
+
+			pv[start] = pv[max_j];
+			pv[max_j] = tmp;
+		}
+	}
+}
+
+
+void full_choose_parallel(double **matrix, int rows, int columns, int sub_matrix_size, int *pv) {
+	int start = rows - sub_matrix_size,
+        max_i = start, 
+        max_j = start, 
+        priv_max_j = start, 
+        priv_max_i = start;
+	double max_v = matrix[start][start], priv_max_v = matrix[start][start];
+
+	if (start >= rows) return;
+
+#pragma omp parallel default(none) shared(matrix, rows, columns, sub_matrix_size, pv, max_v, max_i, max_j, start) firstprivate(priv_max_i,priv_max_j,priv_max_v)
 	{
-		int i, j, priv_max_j, priv_max_i, priv_max_val;
-
-#pragma omp for schedule(static) collapse(2) default(none) private(i, j)
-		for (i = start; i < rows; i++) {
-			for (j = start; j < columns - 1; j++) { //wyraz wolny nie jest brany pod uwagę
-				if (max_v < matrix[i][j]) {
-					max_i = i;
-					max_j = j;
-					max_v = matrix[i][j];
+#pragma omp for schedule(static) collapse(2)
+		for (int i = start; i < rows; i++) {
+			for (int j = start; j < columns - 1; j++) { //wyraz wolny nie jest brany pod uwagę
+				if (priv_max_v < matrix[i][j]) {
+					priv_max_i = i;
+					priv_max_j = j;
+					priv_max_v = matrix[i][j];
 				}
 			}
 		}
 
-#pragma omp flush (priv_max_i, priv_max_j, priv_max_val) 
+#pragma omp flush (max_v) 
 		{
+            if (priv_max_v > max_v) {
 #pragma omp critical
-			{
-				if (priv_max_val > max_v) {
-					max_v = priv_max_val;
-					max_i = priv_max_i;
-					max_j = priv_max_j;
-				}
-			}
+                {
+                    if (priv_max_v > max_v) {
+                        max_v = priv_max_v;
+                        max_i = priv_max_i;
+                        max_j = priv_max_j;
+                    }
+                }
+            }
 		}
 	}
 
