@@ -1,0 +1,1 @@
+gcc main.c solve.c data_read.c printing.c -fopenmp -O3 -march=native -Wall -pedantic-errors -o release.out
