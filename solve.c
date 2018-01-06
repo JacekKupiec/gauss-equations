@@ -303,11 +303,11 @@ double* solve_with_full_choose(double **matrix, int rows, int columns) {
 double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) {
 	int *pv = (int*)malloc(sizeof(int) * columns); //pv to permutation_vector
 	double *R = (double*)malloc(sizeof(double) * rows);
-	char infinitely_many = 0;
+	char infinitely_many = 0, illegal = 0;
 
 	assert(R != NULL);
 	assert(pv != NULL);
-
+	
 	//inicjalizacja wektora permutacji
 #pragma omp parallel for schedule(static)
 	for(int i = 0; i < columns; i++)
@@ -318,9 +318,10 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 			full_choose(matrix, rows, columns, rows - i, pv);
 
 			if (matrix[i][pv[i]] != 0) {
+#pragma omp parallel for schedule(static)
 				for (int j = i + 1; j < rows; j++) {
 					double c = matrix[j][pv[i]] / matrix[i][pv[i]];
-#pragma omp parallel for schedule(static)
+
 					for (int k = i; k < columns; k++) {
 						matrix[j][pv[k]] -= c*matrix[i][pv[k]];
 					}
@@ -329,11 +330,14 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 	}
 
 	//sprawdzam czy istnieja rozwiązania
+#pragma omp parallel for schedule(static)
 	for (int i = rows - 1; i >= 0; i--)
 		if (matrix[i][pv[i]] == 0 && matrix[i][pv[columns - 1]] != 0)
-			return NULL; //brak rozwiązań
+			illegal = 1; //brak rozwiązań
 		else if (matrix[i][pv[i]] == 0 && matrix[i][pv[columns - 1]] == 0)
 			infinitely_many = 1;
+
+	if (illegal) return NULL;
 
 	if (infinitely_many) {
 		R = (double*)realloc(R, sizeof(double)); //bo po co mi więcej ? :)

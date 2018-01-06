@@ -1,0 +1,4 @@
+Czy zrównoleglać wszystkie pętle skoro sekwencyjnie jes o wiele szybciej?
+Dopiero od 10_000 równań jest szybciej wielowątkowo (o 3 minuty).
+Czy używać nested parallelism?
+Jak OpenMP zarządza wątkami?

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <omp.h>
 
 void max_cell(double **matrix, int start, int rows, int columns) {
 	double max_v = matrix[start][start];
