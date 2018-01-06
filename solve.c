@@ -122,7 +122,7 @@ void full_choose_parallel(double **matrix, int rows, int columns, int sub_matrix
 double* solve_naive(double **matrix, int rows, int columns) {
 	int i, j, k;
 	double c, *R = (double*)malloc(sizeof(double)*rows);
-	char nieskonczenie_wiele = 0;
+	char infinitely_many = 0;
 
 	if (R == NULL)
 		return NULL;
@@ -150,9 +150,9 @@ double* solve_naive(double **matrix, int rows, int columns) {
 		if (matrix[i][i] == 0 && matrix[i][columns - 1] != 0)
 			return NULL; //brak rozwiązań
 		else if (matrix[i][i] == 0 && matrix[i][columns - 1] == 0)
-			nieskonczenie_wiele = 1;
+			infinitely_many = 1;
 
-	if (nieskonczenie_wiele) {
+	if (infinitely_many) {
 		R = (double*)realloc(R, sizeof(double)); //bo po co mi więcej ? :)
 		assert(R != NULL);
 		R[0] = INFINITY;
@@ -176,7 +176,7 @@ double* solve_naive(double **matrix, int rows, int columns) {
 double* solve_with_partial_choose(double **matrix, int rows, int columns) {
 	int i, j, k;
 	double c, *R = (double*)malloc(sizeof(double)*rows);
-	char nieskonczenie_wiele = 0;
+	char infinitely_many = 0;
 
 	if (R == NULL)
 		return NULL;
@@ -212,9 +212,9 @@ double* solve_with_partial_choose(double **matrix, int rows, int columns) {
 		if (matrix[i][i] == 0 && matrix[i][columns - 1] != 0)
 			return NULL; //brak rozwiązań
 		else if (matrix[i][i] == 0 && matrix[i][columns - 1] == 0)
-			nieskonczenie_wiele = 1;
+			infinitely_many = 1;
 
-	if (nieskonczenie_wiele) {
+	if (infinitely_many) {
 		R = (double*)realloc(R, sizeof(double)); //bo po co mi wi�cej ? :)
 		assert(R != NULL);
 		R[0] = INFINITY;
@@ -239,7 +239,7 @@ double* solve_with_partial_choose(double **matrix, int rows, int columns) {
 double* solve_with_full_choose(double **matrix, int rows, int columns) {
 	int i, j, k, *pv = (int*)malloc(sizeof(int) * columns); //pv to permutation_vector
 	double c, *R = (double*)malloc(sizeof(double) * rows);
-	char nieskonczenie_wiele = 0;
+	char infinitely_many = 0;
 
 	if (R == NULL || pv == NULL)
 		return NULL;
@@ -276,9 +276,9 @@ double* solve_with_full_choose(double **matrix, int rows, int columns) {
 		if (matrix[i][pv[i]] == 0 && matrix[i][pv[columns - 1]] != 0)
 			return NULL; //brak rozwiązań
 		else if (matrix[i][pv[i]] == 0 && matrix[i][pv[columns - 1]] == 0)
-			nieskonczenie_wiele = 1;
+			infinitely_many = 1;
 
-	if (nieskonczenie_wiele) {
+	if (infinitely_many) {
 		R = (double*)realloc(R, sizeof(double)); //bo po co mi więcej ? :)
 		assert(R != NULL);
 		R[0] = INFINITY;
@@ -291,6 +291,70 @@ double* solve_with_full_choose(double **matrix, int rows, int columns) {
 		for (R[i] = matrix[i][pv[columns - 1]], j = i + 1; j < columns - 1; j++)
 			R[i] -= matrix[i][pv[j]] * R[j];
 
+		assert(matrix[i][pv[i]]);
+		R[i] /= matrix[i][pv[i]];
+	}
+
+	free(pv);
+
+	return R;
+}
+
+double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) {
+	int *pv = (int*)malloc(sizeof(int) * columns); //pv to permutation_vector
+	double *R = (double*)malloc(sizeof(double) * rows);
+	char infinitely_many = 0;
+
+	assert(R != NULL);
+	assert(pv != NULL);
+
+	//inicjalizacja wektora permutacji
+#pragma omp parallel for schedule(static)
+	for(int i = 0; i < columns; i++)
+		pv[i] = i;
+
+	//postępowanie proste
+	for (int i = 0; i < rows; i++) {
+			full_choose(matrix, rows, columns, rows - i, pv);
+
+			if (matrix[i][pv[i]] != 0) {
+				for (int j = i + 1; j < rows; j++) {
+					double c = matrix[j][pv[i]] / matrix[i][pv[i]];
+#pragma omp parallel for schedule(static)
+					for (int k = i; k < columns; k++) {
+						matrix[j][pv[k]] -= c*matrix[i][pv[k]];
+					}
+				}
+			}
+	}
+
+	//sprawdzam czy istnieja rozwiązania
+	for (int i = rows - 1; i >= 0; i--)
+		if (matrix[i][pv[i]] == 0 && matrix[i][pv[columns - 1]] != 0)
+			return NULL; //brak rozwiązań
+		else if (matrix[i][pv[i]] == 0 && matrix[i][pv[columns - 1]] == 0)
+			infinitely_many = 1;
+
+	if (infinitely_many) {
+		R = (double*)realloc(R, sizeof(double)); //bo po co mi więcej ? :)
+		assert(R != NULL);
+		R[0] = INFINITY;
+
+		return R;
+	}
+
+	//Postępowanie odwrtone
+	for (int i = rows - 1; i >= 0; i--) {
+		double sum = 0;
+
+		R[i] = matrix[i][pv[columns - 1]];
+		//columns - 1 poniewaz nie chcę odjemować od ... = "liczba" tejże "liczby" ,która jest w matrix[i][columns - 1]
+#pragma omp parallel for schedule(static) reduction(+:sum)
+		for (int j = i + 1; j < columns - 1; j++) {
+			sum += matrix[i][pv[j]] * R[j];
+		}
+
+		R[i] -= sum;
 		assert(matrix[i][pv[i]]);
 		R[i] /= matrix[i][pv[i]];
 	}

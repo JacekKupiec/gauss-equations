@@ -9,7 +9,7 @@ double **LoadEquationMatrix(char *path, int *rows, int *columns) {
 	FILE *file;
 
 	if ((file = fopen(path, "r")) == NULL) {
-		printf("Nie udalo sie otworzyc podanego pliku: %s\n", path);
+		printf("%s:%d Nie udalo sie otworzyc podanego pliku: %s\n", __FILE__, __LINE__, path);
 		return NULL;
 	}
 
@@ -63,14 +63,14 @@ double **LoadGraphMatrix(char *path, int *rows, int *columns) {
 
 	rewind(file);
 
-	//zak�adam ,�e graf jest skierowany, �eby zrobic nieskierowany wystarczy nast�pna kraw�d�
+	//zakładam ,że graf jest skierowany, żeby zrobic nieskierowany wystarczy następna krawędź
 	while (fscanf(file, "%d %d", &a, &b) == 2) {
 		matrix[b][a] = 1.0;
 		L[a]++;
 	}
 
 
-	//Sprawdzam ,kt�re strony nie linkuj� do niczego i zmieniam ich macierz s�siedztwa na tak� ,kt�ra m�wi ,�e linkuje do wszystkich element�w
+	//Sprawdzam ,które strony nie linkują do niczego i zmieniam ich macierz sąsiedztwa na taką ,która mówi ,że linkuje do wszystkich elementów
 	for (i = 0; i < *rows; i++) {
 		if (!L[i]) {
 			for (j = 0; j < *rows; j++)
@@ -89,13 +89,13 @@ double **LoadGraphMatrix(char *path, int *rows, int *columns) {
 	}
 #endif
 
-	//Teraz tworz� macierz (I - d*B*A)
+	//Teraz tworzę macierz (I - d*B*A)
 	for (i = 0; i < *rows; i++)
 	for (j = 0; j < *rows; j++) {
 		if (i == j)
 			matrix[i][i] = 1;
 		else if (matrix[i][j] > 0)
-			//Je�eli jest s�siedztwo to przypisze si� warto�� ,a jak nie to pozostania 0 jak by�o
+			//Jeżeli jest sąsiedztwo to przypisze się wartość ,a jak nie to pozostania 0 jak było
 			matrix[i][j] = -1.0 * d / (double)L[j];
 	}
 
