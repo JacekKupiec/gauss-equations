@@ -11,15 +11,13 @@
 int main(int argc, char **argv) {
 	double *solutions = NULL;
 	double **equations = NULL;
-	int rows, columns;
+	int i, rows, columns;
 	clock_t t;
 
 	if (argv[1][0] == 'h') {
 		puts("HELP: program r|g s|p path");
 		return EXIT_SUCCESS;
 	}
-
-	
 
 	if (argv[1][0] == 'r') 
 		equations = LoadEquationMatrix(argv[4], &rows, &columns);
@@ -43,7 +41,7 @@ int main(int argc, char **argv) {
 	printf("Czas przetwarzania: %lf\n", ((double)t) / CLOCKS_PER_SEC);
 
 	if (argv[3][0] == 'v')
-		for (int i = 0; i < rows; i++)
+		for (i = 0; i < rows; i++)
 			printf("%f\n", solutions[i]);
 
 	return EXIT_SUCCESS;

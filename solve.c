@@ -62,7 +62,7 @@ void full_choose(double **matrix, int rows, int columns, int sub_matrix_size, in
 
 
 void full_choose_parallel(double **matrix, int rows, int columns, int sub_matrix_size, int *pv) {
-	int start = rows - sub_matrix_size,
+	int i, j, start = rows - sub_matrix_size,
         max_i = start, 
         max_j = start, 
         priv_max_j = start, 
@@ -71,11 +71,11 @@ void full_choose_parallel(double **matrix, int rows, int columns, int sub_matrix
 
 	if (start >= rows) return;
 
-#pragma omp parallel default(none) shared(matrix, rows, columns, sub_matrix_size, pv, max_v, max_i, max_j, start) firstprivate(priv_max_i,priv_max_j,priv_max_v)
+#pragma omp parallel default(none) shared(matrix, rows, columns, sub_matrix_size, pv, max_v, max_i, max_j, start) firstprivate(priv_max_i,priv_max_j,priv_max_v) private(i, j)
 	{
 #pragma omp for schedule(static) collapse(2)
-		for (int i = start; i < rows; i++) {
-			for (int j = start; j < columns - 1; j++) { //wyraz wolny nie jest brany pod uwagę
+		for (i = start; i < rows; i++) {
+			for (j = start; j < columns - 1; j++) { //wyraz wolny nie jest brany pod uwagę
 				if (priv_max_v < matrix[i][j]) {
 					priv_max_i = i;
 					priv_max_j = j;
@@ -302,6 +302,7 @@ double* solve_with_full_choose(double **matrix, int rows, int columns) {
 
 double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) {
 	int *pv = (int*)malloc(sizeof(int) * columns); //pv to permutation_vector
+	int i, j, k;
 	double *R = (double*)malloc(sizeof(double) * rows);
 	char infinitely_many = 0, illegal = 0;
 
@@ -309,20 +310,20 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 	assert(pv != NULL);
 	
 	//inicjalizacja wektora permutacji
-#pragma omp parallel for schedule(static)
-	for(int i = 0; i < columns; i++)
+#pragma omp parallel for schedule(static) private(i)
+	for(i = 0; i < columns; i++)
 		pv[i] = i;
 
 	//postępowanie proste
-	for (int i = 0; i < rows; i++) {
+	for (i = 0; i < rows; i++) {
 			full_choose(matrix, rows, columns, rows - i, pv);
 
 			if (matrix[i][pv[i]] != 0) {
-#pragma omp parallel for schedule(static)
-				for (int j = i + 1; j < rows; j++) {
+#pragma omp parallel for schedule(static) private(j, k)
+				for (j = i + 1; j < rows; j++) {
 					double c = matrix[j][pv[i]] / matrix[i][pv[i]];
 
-					for (int k = i; k < columns; k++) {
+					for (k = i; k < columns; k++) {
 						matrix[j][pv[k]] -= c*matrix[i][pv[k]];
 					}
 				}
@@ -330,8 +331,8 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 	}
 
 	//sprawdzam czy istnieja rozwiązania
-#pragma omp parallel for schedule(static)
-	for (int i = rows - 1; i >= 0; i--)
+#pragma omp parallel for schedule(static) private(i)
+	for (i =   - 1; i >= 0; i--)
 		if (matrix[i][pv[i]] == 0 && matrix[i][pv[columns - 1]] != 0)
 			illegal = 1; //brak rozwiązań
 		else if (matrix[i][pv[i]] == 0 && matrix[i][pv[columns - 1]] == 0)
@@ -348,13 +349,13 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 	}
 
 	//Postępowanie odwrtone
-	for (int i = rows - 1; i >= 0; i--) {
+	for (i = rows - 1; i >= 0; i--) {
 		double sum = 0;
 
 		R[i] = matrix[i][pv[columns - 1]];
 		//columns - 1 poniewaz nie chcę odjemować od ... = "liczba" tejże "liczby" ,która jest w matrix[i][columns - 1]
-#pragma omp parallel for schedule(static) reduction(+:sum)
-		for (int j = i + 1; j < columns - 1; j++) {
+#pragma omp parallel for schedule(static) private(j) reduction(+:sum)
+		for (j = i + 1; j < columns - 1; j++) {
 			sum += matrix[i][pv[j]] * R[j];
 		}
 
