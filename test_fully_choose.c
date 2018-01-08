@@ -25,7 +25,7 @@ void max_cell_reduction(double **matrix, int start, int rows, int columns) {
     double max_v = matrix[start][start];
 	int max_i = start, max_j = start;
 
-#pragma omp parallel for schedule(static) collapse(2) reduction(max: max_v)
+#pragma omp parallel for schedule(guided) collapse(2) reduction(max: max_v)
 	for (int i = start; i < rows; i++) {
 		for (int j = start; j < columns - 1; j++) { //wyraz wolny nie jest brany pod uwagę
 			if (max_v < matrix[i][j]) {
@@ -117,6 +117,7 @@ int main(int argc, char **argv) {
         for (j = 0; j < columns; j++)
             equations[i][j] = (double)rand() / RAND_MAX;
 
+printf("%d\n",omp_get_num_threads());
 	t = clock();
 	full_choose(equations, rows, columns, rows, pv);
 	t = clock() - t;
