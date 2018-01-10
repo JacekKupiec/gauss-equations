@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <time.h>
 #include <omp.h>
-#include "printing.h"
+#include "shared_consts.h"
 
 double **LoadEquationMatrix(char *path, int *rows, int *columns) {
 	double **matrix;
@@ -20,10 +20,10 @@ double **LoadEquationMatrix(char *path, int *rows, int *columns) {
 	*rows = n;
 	*columns = n + 1;
 
-	matrix = (double**)malloc(sizeof(double*)*n);
+	matrix = (double**)_mm_malloc(sizeof(double*)*n, ALIGNMENT_SIZE);
 
 	for (i = 0; i < n; i++) {
-		matrix[i] = (double*)malloc(sizeof(double)*(n + 1));
+		matrix[i] = (double*)_mm_malloc(sizeof(double)*(n + 1), ALIGNMENT_SIZE);
 
 		for (j = 0; j <= n; j++)
 			assert(fscanf(file, "%lf", matrix[i] + j) == 1);
@@ -50,11 +50,7 @@ double **LoadGraphMatrix(char *path, int *rows, int *columns) {
 			max = b;
 	}
 
-#ifdef _DEBUG
-	printf("Maks = %d\n", max + 1);
-#endif
-
-	matrix = (double**)malloc(sizeof(double*)*(max + 1));
+	matrix = (double**)_mm_malloc(sizeof(double*)*(max + 1), ALIGNMENT_SIZE);
 	L = (int*)calloc((max + 1), sizeof(int));
 
 	*rows = max + 1;
@@ -84,13 +80,6 @@ double **LoadGraphMatrix(char *path, int *rows, int *columns) {
 		matrix[i][*columns - 1] = (1 - d) / *rows;
 	}
 
-#ifdef _DEBUG
-	if (max <= 20) {
-		puts("Macierz sasiedztwa");
-		PrintMatrix(matrix, *rows, *rows);
-	}
-#endif
-
 	//Teraz tworzę macierz (I - d*B*A)
 	for (i = 0; i < *rows; i++)
 	for (j = 0; j < *rows; j++) {
@@ -101,29 +90,25 @@ double **LoadGraphMatrix(char *path, int *rows, int *columns) {
 			matrix[i][j] = -1.0 * d / (double)L[j];
 	}
 
-#ifdef _DEBUG
-	if (max <= 20) {
-		puts("Po wszystkich przekształceniach:");
-		PrintMatrix(matrix, *rows, *columns);
-	}
-#endif
 
 	fclose(file);
-	free(L);
+	_mm_free(L);
 
 	return matrix;
 }
 
 
 double** DrawEquationMatrixParallel(int rows, int columns) {
-	double **matrix;
+	double **matrix = NULL;
 	int i, j;
 
-	if ((matrix = malloc(sizeof(double*)*rows)) == NULL)
-		return NULL;
+	matrix = _mm_malloc(sizeof(double*)*rows, ALIGNMENT_SIZE);
+	if (matrix == NULL) return NULL;
 
-	for (i = 0; i < rows; i++)
-		matrix[i] = malloc(sizeof(double)*columns);
+	for (i = 0; i < rows; i++) {
+		matrix[i] = _mm_malloc(sizeof(double)*columns, ALIGNMENT_SIZE);
+		if (matrix[i] == NULL) return NULL;
+	}
 	
 	srand(time(NULL));
 
@@ -137,17 +122,18 @@ double** DrawEquationMatrixParallel(int rows, int columns) {
 }
 
 double** DrawEquationMatrix(int rows, int columns) {
-	double **matrix;
+	double **matrix = NULL;
 	int i, j;
 
-	if ((matrix = malloc(sizeof(double*)*rows)) == NULL)
-		return NULL;
+	matrix = _mm_malloc(sizeof(double*)*rows, ALIGNMENT_SIZE);
+	if (matrix == NULL) return NULL;
 	
 	srand(time(NULL));
 
 	for (i = 0; i < rows; i++) {
-		matrix[i] = malloc(sizeof(double)*columns);
-		
+		matrix[i] = _mm_malloc(sizeof(double)*columns, ALIGNMENT_SIZE);
+		if (matrix[i] == NULL) return NULL;
+
 		for (j = 0; j < columns; j++)
 			matrix[i][j] = (double)rand() / RAND_MAX;
 	}
