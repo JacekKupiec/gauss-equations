@@ -1,0 +1,94 @@
+main.c(43): (col. 3) remark: loop was not vectorized: existence of vector dependence
+data_read.c(28): (col. 3) remark: loop was not vectorized: unsupported loop structure
+data_read.c(25): (col. 2) remark: loop was not vectorized: nonstandard loop is not a vectorization candidate
+data_read.c(45): (col. 2) remark: loop was not vectorized: unsupported loop structure
+data_read.c(53): (col. 2) remark: loop was not vectorized: existence of vector dependence
+data_read.c(55): (col. 4) remark: vector dependence: assumed OUTPUT dependence between  line 55 and  line 55
+data_read.c(55): (col. 27) remark: vector dependence: assumed OUTPUT dependence between  line 55 and  line 55
+data_read.c(55): (col. 4) remark: vector dependence: assumed ANTI dependence between  line 55 and  line 55
+data_read.c(55): (col. 27) remark: vector dependence: assumed FLOW dependence between  line 55 and  line 55
+data_read.c(55): (col. 4) remark: vector dependence: assumed ANTI dependence between  line 55 and  line 55
+data_read.c(55): (col. 4) remark: vector dependence: assumed FLOW dependence between  line 55 and  line 55
+data_read.c(55): (col. 4) remark: vector dependence: assumed FLOW dependence between  line 55 and  line 55
+data_read.c(55): (col. 4) remark: vector dependence: assumed ANTI dependence between  line 55 and  line 55
+data_read.c(55): (col. 27) remark: vector dependence: assumed OUTPUT dependence between  line 55 and  line 55
+data_read.c(55): (col. 4) remark: vector dependence: assumed OUTPUT dependence between  line 55 and  line 55
+data_read.c(55): (col. 27) remark: vector dependence: assumed FLOW dependence between  line 55 and  line 55
+data_read.c(55): (col. 4) remark: vector dependence: assumed ANTI dependence between  line 55 and  line 55
+data_read.c(73): (col. 3) remark: loop was not vectorized: existence of vector dependence
+data_read.c(74): (col. 4) remark: vector dependence: assumed ANTI dependence between matrix line 74 and matrix line 74
+data_read.c(74): (col. 4) remark: vector dependence: assumed FLOW dependence between matrix line 74 and matrix line 74
+data_read.c(74): (col. 4) remark: vector dependence: assumed FLOW dependence between matrix line 74 and matrix line 74
+data_read.c(74): (col. 4) remark: vector dependence: assumed ANTI dependence between matrix line 74 and matrix line 74
+data_read.c(70): (col. 2) remark: loop was not vectorized: nonstandard loop is not a vectorization candidate
+solve.c(16): (col. 3) remark: loop was not vectorized: nonstandard loop is not a vectorization candidate
+solve.c(16): (col. 3) remark: loop was not vectorized: existence of vector dependence
+solve.c(17): (col. 4) remark: vector dependence: assumed ANTI dependence between max_v line 17 and max_v line 20
+solve.c(20): (col. 5) remark: vector dependence: assumed FLOW dependence between max_v line 20 and max_v line 17
+solve.c(20): (col. 5) remark: vector dependence: assumed FLOW dependence between max_v line 20 and max_v line 17
+solve.c(17): (col. 4) remark: vector dependence: assumed ANTI dependence between max_v line 17 and max_v line 20
+solve.c(15): (col. 2) remark: loop was not vectorized: not inner loop
+solve.c(112): (col. 2) remark: LOOP WAS VECTORIZED
+solve.c(112): (col. 2) remark: PEEL LOOP WAS VECTORIZED
+solve.c(112): (col. 2) remark: REMAINDER LOOP WAS VECTORIZED
+solve.c(117): (col. 4) remark: loop was not vectorized: nonstandard loop is not a vectorization candidate
+solve.c(117): (col. 4) remark: loop was not vectorized: existence of vector dependence
+solve.c(117): (col. 4) remark: vector dependence: assumed ANTI dependence between max_v.341 line 117 and max_v.341 line 117
+solve.c(117): (col. 4) remark: vector dependence: assumed FLOW dependence between max_v.341 line 117 and max_v.341 line 117
+solve.c(117): (col. 4) remark: vector dependence: assumed FLOW dependence between max_v.341 line 117 and max_v.341 line 117
+solve.c(117): (col. 4) remark: vector dependence: assumed ANTI dependence between max_v.341 line 117 and max_v.341 line 117
+solve.c(117): (col. 4) remark: loop was not vectorized: not inner loop
+solve.c(121): (col. 5) remark: loop was not vectorized: existence of vector dependence
+solve.c(122): (col. 6) remark: vector dependence: assumed ANTI dependence between matrix line 122 and matrix line 122
+solve.c(122): (col. 6) remark: vector dependence: assumed FLOW dependence between matrix line 122 and matrix line 122
+solve.c(122): (col. 6) remark: vector dependence: assumed FLOW dependence between matrix line 122 and matrix line 122
+solve.c(122): (col. 6) remark: vector dependence: assumed ANTI dependence between matrix line 122 and matrix line 122
+solve.c(122): (col. 6) remark: vector dependence: assumed ANTI dependence between matrix line 122 and matrix line 122
+solve.c(122): (col. 6) remark: vector dependence: assumed FLOW dependence between matrix line 122 and matrix line 122
+solve.c(122): (col. 6) remark: vector dependence: assumed FLOW dependence between matrix line 122 and matrix line 122
+solve.c(122): (col. 6) remark: vector dependence: assumed ANTI dependence between matrix line 122 and matrix line 122
+solve.c(120): (col. 4) remark: loop was not vectorized: not inner loop
+solve.c(116): (col. 2) remark: loop was not vectorized: not inner loop
+solve.c(128): (col. 2) remark: loop was not vectorized: nonstandard loop is not a vectorization candidate
+solve.c(142): (col. 3) remark: loop was not vectorized: existence of vector dependence
+solve.c(143): (col. 4) remark: vector dependence: assumed ANTI dependence between  line 143 and  line 143
+solve.c(143): (col. 4) remark: vector dependence: assumed FLOW dependence between  line 143 and  line 143
+solve.c(143): (col. 4) remark: vector dependence: assumed FLOW dependence between  line 143 and  line 143
+solve.c(143): (col. 4) remark: vector dependence: assumed ANTI dependence between  line 143 and  line 143
+solve.c(143): (col. 4) remark: vector dependence: assumed ANTI dependence between  line 143 and  line 143
+solve.c(143): (col. 4) remark: vector dependence: assumed FLOW dependence between  line 143 and  line 143
+solve.c(143): (col. 4) remark: vector dependence: assumed FLOW dependence between  line 143 and  line 143
+solve.c(143): (col. 4) remark: vector dependence: assumed ANTI dependence between  line 143 and  line 143
+solve.c(140): (col. 2) remark: loop was not vectorized: nonstandard loop is not a vectorization candidate
+solve.c(201): (col. 2) remark: loop was not vectorized: unsupported loop structure
+solve.c(166): (col. 2) remark: LOOP WAS VECTORIZED
+solve.c(170): (col. 2) remark: loop was not vectorized: unsupported loop structure
+solve.c(177): (col. 6) remark: loop was not vectorized: existence of vector dependence
+solve.c(178): (col. 7) remark: vector dependence: assumed ANTI dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed FLOW dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed FLOW dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed ANTI dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed ANTI dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed FLOW dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed FLOW dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed ANTI dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed ANTI dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed FLOW dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed FLOW dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed ANTI dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed ANTI dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed FLOW dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed FLOW dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed ANTI dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed ANTI dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed FLOW dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed FLOW dependence between matrix line 178 and matrix line 178
+solve.c(178): (col. 7) remark: vector dependence: assumed ANTI dependence between matrix line 178 and matrix line 178
+solve.c(174): (col. 5) remark: loop was not vectorized: not inner loop
+solve.c(206): (col. 1) remark: LOOP WAS VECTORIZED
+solve.c(206): (col. 1) remark: PEEL LOOP WAS VECTORIZED
+solve.c(206): (col. 1) remark: REMAINDER LOOP WAS VECTORIZED
+solve.c(58): (col. 3) remark: loop was not vectorized: existence of vector dependence
+solve.c(60): (col. 5) remark: vector dependence: assumed ANTI dependence between priv_max_v line 60 and priv_max_v line 63
+solve.c(63): (col. 6) remark: vector dependence: assumed FLOW dependence between priv_max_v line 63 and priv_max_v line 60
+solve.c(60): (col. 5) remark: vector dependence: assumed ANTI dependence between priv_max_v line 60 and priv_max_v line 63
