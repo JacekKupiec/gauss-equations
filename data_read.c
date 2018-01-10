@@ -133,7 +133,6 @@ double** DrawEquationMatrix(int rows, int columns) {
 	for (i = 0; i < rows; i++) {
 		matrix[i] = _mm_malloc(sizeof(double)*columns, ALIGNMENT_SIZE);
 		if (matrix[i] == NULL) return NULL;
-
 		for (j = 0; j < columns; j++)
 			matrix[i][j] = (double)rand() / RAND_MAX;
 	}
