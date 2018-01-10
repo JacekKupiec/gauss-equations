@@ -101,8 +101,8 @@ void full_choose_parallel(double **matrix, int rows, int columns, int sub_matrix
 
 
 double* solve_with_full_choose(double **matrix, int rows, int columns) {
-	int i, j, k, *pv = (int*)_mm_malloc(sizeof(int) * columns, ALIGNMENT_SIZE); //pv to permutation_vector
-	double c, *R = (double*)_mm_malloc(sizeof(double) * rows, ALIGNMENT_SIZE);
+	int i, j, k, *pv = (int*)malloc(sizeof(int) * columns); //pv to permutation_vector
+	double c, *R = (double*)malloc(sizeof(double) * rows);
 	char infinitely_many = 0;
 
 	if (R == NULL || pv == NULL)
@@ -146,15 +146,15 @@ double* solve_with_full_choose(double **matrix, int rows, int columns) {
 		R[i] /= matrix[i][pv[i]];
 	}
 
-	_mm_free(pv);
+	free(pv);
 
 	return R;
 }
 
 double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) {
-	int *pv = (int*)_mm_malloc(sizeof(int) * columns, ALIGNMENT_SIZE); //pv to permutation_vector
+	int *pv = (int*)malloc(sizeof(int) * columns); //pv to permutation_vector
 	int i, j, k;
-	double *R = (double*)_mm_malloc(sizeof(double) * rows, ALIGNMENT_SIZE);
+	double *R = (double*)malloc(sizeof(double) * rows);
 	char infinitely_many = 0, illegal = 0;
 
 	assert(R != NULL);
@@ -215,7 +215,7 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 		R[i] /= matrix[i][pv[i]];
 	}
 
-	_mm_free(pv);
+	free(pv);
 
 	return R;
 }

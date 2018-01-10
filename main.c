@@ -24,8 +24,6 @@ int main(int argc, char **argv) {
 
 	if (argv[1][0] == 'f') 
 		equations = LoadEquationMatrix(argv[3], &rows, &columns);
-	else if (argv[1][0] == 'g')
-		equations = LoadGraphMatrix(argv[3], &rows, &columns);
 	else if (argv[1][0] == 'r') {
 		sscanf(argv[3], "%d", &rows);
 		sscanf(argv[4], "%d", &columns);
