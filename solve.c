@@ -178,12 +178,13 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 	for(i = 0; i < columns; i++)
 		pv[i] = i;
 
-	//postępowanie proste
+	//puts("postępowanie proste");
+#pragma omp parallel for default(none) schedule(static) num_threads(1) private(i, j, k) shared(matrix, rows, columns, pv)
 	for (i = 0; i < rows; i++) {
-			full_choose(matrix, rows, columns, rows - i, pv);
+			full_choose(matrix, rows, columns, rows - i, pv);	
 
 			if (matrix[i][pv[i]] != 0) {
-#pragma omp parallel for schedule(static) private(j, k)
+#pragma omp parallel for default(none) schedule(static) private(j, k) shared(matrix, rows, columns, pv, i) num_threads(2)
 				for (j = i + 1; j < rows; j++) {
 					double c = matrix[j][pv[i]] / matrix[i][pv[i]];
 
@@ -194,7 +195,7 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 			}
 	}
 
-	//sprawdzam czy istnieja rozwiązania
+	//puts("sprawdzam czy istnieja rozwiązania");
 #pragma omp parallel for schedule(static) private(i)
 	for (i =   - 1; i >= 0; i--)
 		if (matrix[i][pv[i]] == 0 && matrix[i][pv[columns - 1]] != 0)
@@ -212,7 +213,7 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 		return R;
 	}
 
-	//Postępowanie odwrtone
+	//puts("Postępowanie odwrtone");
 	for (i = rows - 1; i >= 0; i--) {
 		double sum = 0;
 

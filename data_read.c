@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <time.h>
+#include <omp.h>
 #include "printing.h"
 
 double **LoadEquationMatrix(char *path, int *rows, int *columns) {
@@ -108,6 +110,47 @@ double **LoadGraphMatrix(char *path, int *rows, int *columns) {
 
 	fclose(file);
 	free(L);
+
+	return matrix;
+}
+
+
+double** DrawEquationMatrixParallel(int rows, int columns) {
+	double **matrix;
+	int i, j;
+
+	if ((matrix = malloc(sizeof(double*)*rows)) == NULL)
+		return NULL;
+
+	for (i = 0; i < rows; i++)
+		matrix[i] = malloc(sizeof(double)*columns);
+	
+	srand(time(NULL));
+
+#pragma omp parallel for default(none) schedule(static) private(i, j) shared(matrix, rows, columns) collapse(2)
+	for (i = 0; i < rows; i++) {
+		for (j = 0; j < columns; j++)
+			matrix[i][j] = (double)rand() / RAND_MAX;
+	}
+
+	return matrix;
+}
+
+double** DrawEquationMatrix(int rows, int columns) {
+	double **matrix;
+	int i, j;
+
+	if ((matrix = malloc(sizeof(double*)*rows)) == NULL)
+		return NULL;
+	
+	srand(time(NULL));
+
+	for (i = 0; i < rows; i++) {
+		matrix[i] = malloc(sizeof(double)*columns);
+		
+		for (j = 0; j < columns; j++)
+			matrix[i][j] = (double)rand() / RAND_MAX;
+	}
 
 	return matrix;
 }

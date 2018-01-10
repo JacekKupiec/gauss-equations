@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
         for (j = 0; j < columns; j++)
             equations[i][j] = (double)rand() / RAND_MAX;
 
-printf("%d\n",omp_get_num_threads());
+	omp_set_dynamic(1);
 	t = clock();
 	full_choose(equations, rows, columns, rows, pv);
 	t = clock() - t;
@@ -135,6 +135,7 @@ printf("%d\n",omp_get_num_threads());
     
 	for (i = 0; i < rows; i++)
         free(equations[i]);
+
     free(equations);
     free(pv);
 
