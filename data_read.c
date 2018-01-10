@@ -5,6 +5,7 @@
 #include <omp.h>
 #include "shared_consts.h"
 
+
 double **LoadEquationMatrix(char *path, int *rows, int *columns) {
 	double **matrix;
 	int n, i, j;
@@ -57,6 +58,7 @@ double** DrawEquationMatrixParallel(int rows, int columns) {
 
 	return matrix;
 }
+
 
 double** DrawEquationMatrix(int rows, int columns) {
 	double **matrix = NULL;
