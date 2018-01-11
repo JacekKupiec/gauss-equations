@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <assert.h>
 #include <omp.h>
+#if defined(__INTEL_COMPILER)
+#include <malloc.h>
+#else
+#include <mm_malloc.h>
+#endif
 #include "shared_consts.h"
 
 
@@ -12,17 +17,20 @@ void full_choose(double **matrix, int rows, int columns, int sub_matrix_size, in
 
 	if (start >= rows) return;
 
-	for (i = start, max_v = matrix[start][start], max_i = start, max_j = start; i < rows; i++) {
+	__assume_aligned(matrix, ALIGNMENT_SIZE);
+	__assume_aligned(pv, ALIGNMENT_SIZE);
+
+	for (i = start, max_v = matrix[start][pv[start]], max_i = start, max_j = start; i < rows; i++) {
 		for (j = start; j < columns - 1; j++) { //wyraz wolny nie jest brany pod uwagę
-			if (max_v < matrix[i][j]) {
+			if (max_v < matrix[i][pv[j]]) {
 				max_i = i;
 				max_j = j;
-				max_v = matrix[i][j];
+				max_v = matrix[i][pv[j]];
 			}
 		}
 	}
 
-	if (matrix[start][start] < matrix[max_i][max_j]) {
+	if (matrix[start][pv[start]] < matrix[max_i][pv[max_j]]) {
 		//przesuwam wiersz z maximum na górę
 		if (matrix[start] != matrix[max_i]) {
 			double *tmp = matrix[start];
@@ -48,19 +56,21 @@ void full_choose_parallel(double **matrix, int rows, int columns, int sub_matrix
         max_j = start, 
         priv_max_j = start, 
         priv_max_i = start;
-	double max_v = matrix[start][start], priv_max_v = matrix[start][start];
+	double max_v = matrix[start][pv[start]], priv_max_v = matrix[start][pv[start]];
 
 	if (start >= rows) return;
+	__assume_aligned(matrix, ALIGNMENT_SIZE);
+	__assume_aligned(pv, ALIGNMENT_SIZE);
 
 #pragma omp parallel default(none) shared(matrix, rows, columns, sub_matrix_size, pv, max_v, max_i, max_j, start) firstprivate(priv_max_i,priv_max_j,priv_max_v) private(i, j)
 	{
 #pragma omp for schedule(static) collapse(2)
 		for (i = start; i < rows; i++) {
 			for (j = start; j < columns - 1; j++) { //wyraz wolny nie jest brany pod uwagę
-				if (priv_max_v < matrix[i][j]) {
+				if (priv_max_v < matrix[i][pv[j]]) {
 					priv_max_i = i;
 					priv_max_j = j;
-					priv_max_v = matrix[i][j];
+					priv_max_v = matrix[i][pv[j]];
 				}
 			}
 		}
@@ -80,7 +90,7 @@ void full_choose_parallel(double **matrix, int rows, int columns, int sub_matrix
 		}
 	}
 
-	if (matrix[start][start] < matrix[max_i][max_j]) {
+	if (matrix[start][pv[start]] < matrix[max_i][pv[max_j]]) {
 		//przesuwam wiersz z maximum na górę
 		if (matrix[start] != matrix[max_i]) {
 			double *tmp = matrix[start];
@@ -101,12 +111,16 @@ void full_choose_parallel(double **matrix, int rows, int columns, int sub_matrix
 
 
 double* solve_with_full_choose(double **matrix, int rows, int columns) {
-	int i, j, k, *pv = (int*)malloc(sizeof(int) * columns); //pv to permutation_vector
-	double c, *R = (double*)malloc(sizeof(double) * rows);
+	int i, j, k, *pv = (int*)_mm_malloc(sizeof(int) * columns, ALIGNMENT_SIZE); //pv to permutation_vector
+	double c, *R = (double*)_mm_malloc(sizeof(double) * rows, ALIGNMENT_SIZE);
 	char infinitely_many = 0;
 
 	if (R == NULL || pv == NULL)
 		return NULL;
+
+	__assume_aligned(pv, ALIGNMENT_SIZE);
+	__assume_aligned(R, ALIGNMENT_SIZE);
+	__assume_aligned(matrix, ALIGNMENT_SIZE);
 
 	//inicjalizacja wektora permutacji
 	for(i = 0; i < columns; i++)
@@ -118,6 +132,7 @@ double* solve_with_full_choose(double **matrix, int rows, int columns) {
 
 			if (matrix[i][pv[i]] != 0)
 			for (j = i + 1; j < rows; j++) {
+#pragma ivdep
 				for (k = i, c = matrix[j][pv[i]] / matrix[i][pv[i]]; k < columns; k++) {
 					matrix[j][pv[k]] -= c*matrix[i][pv[k]];
 				}
@@ -146,20 +161,24 @@ double* solve_with_full_choose(double **matrix, int rows, int columns) {
 		R[i] /= matrix[i][pv[i]];
 	}
 
-	free(pv);
+	_mm_free(pv);
 
 	return R;
 }
 
 
 double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) {
-	int *pv = (int*)malloc(sizeof(int) * columns); //pv to permutation_vector
+	int *pv = (int*)_mm_malloc(sizeof(int) * columns, ALIGNMENT_SIZE); //pv to permutation_vector
 	int i, j, k;
-	double *R = (double*)malloc(sizeof(double) * rows);
+	double *R = (double*)_mm_malloc(sizeof(double) * rows, ALIGNMENT_SIZE);
 	char infinitely_many = 0, illegal = 0;
 
 	assert(R != NULL);
 	assert(pv != NULL);
+
+	__assume_aligned(pv, ALIGNMENT_SIZE);
+	__assume_aligned(R, ALIGNMENT_SIZE);
+	__assume_aligned(matrix, ALIGNMENT_SIZE);
 	
 	//inicjalizacja wektora permutacji
 #pragma omp parallel for schedule(static) private(i)
@@ -169,11 +188,12 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 #pragma omp parallel for default(none) schedule(static) num_threads(1) private(i, j, k) shared(matrix, rows, columns, pv)
 	for (i = 0; i < rows; i++) {
 			full_choose_parallel(matrix, rows, columns, rows - i, pv);	
+
 			if (matrix[i][pv[i]] != 0) {
 #pragma omp parallel for default(none) schedule(static) private(j, k) shared(matrix, rows, columns, pv, i)
 				for (j = i + 1; j < rows; j++) {
 					double c = matrix[j][pv[i]] / matrix[i][pv[i]];
-
+#pragma ivdep
 					for (k = i; k < columns; k++) {
 						matrix[j][pv[k]] -= c*matrix[i][pv[k]];
 					}
@@ -191,8 +211,6 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 	if (illegal) return NULL;
 
 	if (infinitely_many) {
-		R = (double*)realloc(R, sizeof(double)); //bo po co mi więcej ? :)
-		assert(R != NULL);
 		R[0] = INFINITY;
 
 		return R;
@@ -213,7 +231,7 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 		R[i] /= matrix[i][pv[i]];
 	}
 
-	free(pv);
+	_mm_free(pv);
 
 	return R;
 }
