@@ -9,6 +9,75 @@
 #endif
 #include "shared_consts.h"
 
+void partial_choose(double **matrix, int rows, int column, int sub_matrix_size) {
+	int i, max_i, start = rows - sub_matrix_size;
+	double max_v;
+
+	for (i = start, max_v = matrix[start][start]; i < rows; i++)
+		if (matrix[i][start] > max_v) {
+			max_v = matrix[i][start];
+			max_i = i;
+		}
+
+	if (matrix[start][start] < max_v) {
+		double *tmp = matrix[max_i];
+
+		matrix[max_i] = matrix[start];
+		matrix[start] = tmp;
+	}
+}
+
+
+double* solve_with_partial_choose(double **matrix, int rows, int columns) {
+	int i, j, k;
+	double *R = (double*)malloc(sizeof(double)*rows);
+	char nieskonczenie_wiele = 0;
+
+	if (R == NULL)
+		return NULL;
+
+	//postępowanie proste
+	for (i = 0; i < rows; i++) {
+		partial_choose(matrix, rows, columns, rows - i);
+
+		if (matrix[i][i] != 0) {
+			for (j = i + 1; j < rows; j++) {
+				double c = matrix[j][i] / matrix[i][i];
+
+				for (k = i; k < columns; k++) {
+					matrix[j][k] -= c*matrix[i][k];
+				}
+			}
+		}
+	}
+
+	//sprawdzam czy istnieją rozwiązania
+	for (i = rows - 1; i >= 0; i--)
+		if (matrix[i][i] == 0 && matrix[i][columns - 1] != 0)
+			return NULL; //brak rozwiązań
+		else if (matrix[i][i] == 0 && matrix[i][columns - 1] == 0)
+			nieskonczenie_wiele = 1;
+
+	if (nieskonczenie_wiele) {
+		R = (double*)realloc(R, sizeof(double)); //bo po co mi więcej ? :)
+		assert(R != NULL);
+		R[0] = INFINITY;
+		return R;
+	}
+
+	//Postępowanie odwrtone
+	for (i = rows - 1; i >= 0; i--) {
+		//columns - 1 poniewaz nie chcę odjemować od ... = "liczba" tejże "liczby" ,która jest w matrix[i][columns - 1]
+		for (R[i] = matrix[i][columns - 1], j = i + 1; j < columns - 1; j++)
+			R[i] -= matrix[i][j] * R[j];
+
+		assert(matrix[i][i] != 0);
+		R[i] /= matrix[i][i];
+	}
+
+	return R;
+}
+
 
 //Wybiera największy element z całej podmacierzy i przestawia wiersz i kolumnę
 void full_choose(double **matrix, int rows, int columns, int sub_matrix_size, int *pv) {
@@ -132,7 +201,6 @@ double* solve_with_full_choose(double **matrix, int rows, int columns) {
 
 			if (matrix[i][pv[i]] != 0)
 			for (j = i + 1; j < rows; j++) {
-#pragma ivdep
 				for (k = i, c = matrix[j][pv[i]] / matrix[i][pv[i]]; k < columns; k++) {
 					matrix[j][pv[k]] -= c*matrix[i][pv[k]];
 				}
@@ -193,7 +261,7 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 #pragma omp parallel for default(none) schedule(static) private(j, k) shared(matrix, rows, columns, pv, i)
 				for (j = i + 1; j < rows; j++) {
 					double c = matrix[j][pv[i]] / matrix[i][pv[i]];
-#pragma ivdep
+
 					for (k = i; k < columns; k++) {
 						matrix[j][pv[k]] -= c*matrix[i][pv[k]];
 					}
@@ -202,7 +270,7 @@ double* solve_with_full_choose_parallel(double **matrix, int rows, int columns) 
 	}
 
 #pragma omp parallel for schedule(static) private(i)
-	for (i =   - 1; i >= 0; i--)
+	for (i = rows - 1; i >= 0; i--)
 		if (matrix[i][pv[i]] == 0 && matrix[i][pv[columns - 1]] != 0)
 			illegal = 1; //brak rozwiązań
 		else if (matrix[i][pv[i]] == 0 && matrix[i][pv[columns - 1]] == 0)

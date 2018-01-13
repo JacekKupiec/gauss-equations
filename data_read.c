@@ -26,10 +26,10 @@ double **LoadEquationMatrix(char *path, int *rows, int *columns) {
 	*rows = n;
 	*columns = n + 1;
 
-	matrix = (double**)_mm_malloc(sizeof(double*)*n, ALIGNMENT_SIZE);
+	matrix = (double**)_mm_malloc(ROUND_UP_ALIGN(sizeof(double*)*n), ALIGNMENT_SIZE);
 
 	for (i = 0; i < n; i++) {
-		matrix[i] = (double*)_mm_malloc(sizeof(double)*(n + 1), ALIGNMENT_SIZE);
+		matrix[i] = (double*)_mm_malloc(ROUND_UP_ALIGN(sizeof(double)*(n + 1)), ALIGNMENT_SIZE);
 
 		for (j = 0; j <= n; j++)
 			assert(fscanf(file, "%lf", matrix[i] + j) == 1);
@@ -45,11 +45,11 @@ double** DrawEquationMatrixParallel(int rows, int columns) {
 	double **matrix = NULL;
 	int i, j;
 
-	matrix = _mm_malloc(sizeof(double*)*rows, ALIGNMENT_SIZE);
+	matrix = _mm_malloc(ROUND_UP_ALIGN(sizeof(double*)*rows), ALIGNMENT_SIZE);
 	if (matrix == NULL) return NULL;
 
 	for (i = 0; i < rows; i++) {
-		matrix[i] = _mm_malloc(sizeof(double)*columns, ALIGNMENT_SIZE);
+		matrix[i] = _mm_malloc(ROUND_UP_ALIGN(sizeof(double)*columns), ALIGNMENT_SIZE);
 		if (matrix[i] == NULL) return NULL;
 	}
 	
@@ -69,13 +69,13 @@ double** DrawEquationMatrix(int rows, int columns) {
 	double **matrix = NULL;
 	int i, j;
 
-	matrix = _mm_malloc(sizeof(double*)*rows, ALIGNMENT_SIZE);
+	matrix = _mm_malloc(ROUND_UP_ALIGN(sizeof(double*)*rows), ALIGNMENT_SIZE);
 	if (matrix == NULL) return NULL;
 	__assume_aligned(matrix, ALIGNMENT_SIZE);
 	srand(time(NULL));
 
 	for (i = 0; i < rows; i++) {
-		matrix[i] = _mm_malloc(sizeof(double)*columns, ALIGNMENT_SIZE);
+		matrix[i] = _mm_malloc(ROUND_UP_ALIGN(sizeof(double)*columns), ALIGNMENT_SIZE);
 		if (matrix[i] == NULL) return NULL;
 		for (j = 0; j < columns; j++)
 			matrix[i][j] = (double)rand() / RAND_MAX;

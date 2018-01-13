@@ -10,5 +10,6 @@
 #endif
 
 #define ALIGNMENT_SIZE 64
+#define ROUND_UP_ALIGN(x) ((((x) + ALIGNMENT_SIZE - 1) / ALIGNMENT_SIZE) * ALIGNMENT_SIZE)
 
 #endif
