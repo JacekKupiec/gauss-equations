@@ -1,8 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <time.h>
-#include <assert.h>
 #include <omp.h>
 #include "solve.h"
 #include "data_read.h"
@@ -33,9 +30,9 @@ int main(int argc, char **argv) {
 	if (equations == NULL) return EXIT_FAILURE;
 
 	if (argv[2][0] == 's')
-		solutions = solve_with_full_choose(equations, rows, columns);
+		solutions = solve_with_partial_choose(equations, rows, columns);
 	else if (argv[2][0] == 'p') 
-		solutions = solve_with_full_choose_parallel(equations, rows, columns);
+		solutions = solve_with_partial_choose_parallel(equations,rows, columns);
 
 	if (solutions == NULL) puts("Brak rozwiązań układu równań");
 
