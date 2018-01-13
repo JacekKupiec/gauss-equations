@@ -33,10 +33,14 @@ double* solve_with_partial_choose(double **matrix, int rows, int columns) {
 	double c, *R = ALLOC_MEMORY(sizeof(double)*rows);
 	char nieskonczenie_wiele = 0;
 
-	if (R == NULL)
-		return NULL;
+	if (R == NULL) return NULL;
 
-	//post�powanie proste
+#ifndef FALSE_SHARING
+	__assume_aligned(R, ALIGNMENT_SIZE);
+	__assume_aligned(matrix, ALIGNMENT_SIZE);
+#endif
+
+	//postępowanie proste
 	for (i = 0; i < rows; i++) {
 			partial_choose(matrix, rows, columns, rows - i);
 
@@ -131,7 +135,7 @@ double* solve_with_partial_choose_parallel(double **matrix, int rows, int column
 	double *R = ALLOC_MEMORY(sizeof(double)*rows);
 	char infinitely_many = 0, illegal = 0;
 
-	assert(R != NULL);
+	if (R == NULL) return NULL;
 
 #ifndef FALSE_SHARING
 	__assume_aligned(R, ALIGNMENT_SIZE);
