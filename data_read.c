@@ -15,7 +15,7 @@ double **LoadEquationMatrix(char *path, int *rows, int *columns) {
 		printf("%s:%d Nie udalo sie otworzyc podanego pliku: %s\n", __FILE__, __LINE__, path);
 		return NULL;
 	}
-	if (fscanf(file, "%d", &n) == 1) return NULL;
+	if (fscanf(file, "%d", &n) != 1) return NULL;
 
 	*rows = n;
 	*columns = n + 1;
@@ -25,7 +25,7 @@ double **LoadEquationMatrix(char *path, int *rows, int *columns) {
 		matrix[i] = (double*)ALLOC_MEMORY(sizeof(double)*(n + 1));
 
 		for (j = 0; j <= n; j++)
-			if (fscanf(file, "%lf", matrix[i] + j) == 1) return NULL;
+			if (fscanf(file, "%lf", matrix[i] + j) != 1) return NULL;
 	}
 
 	fclose(file);

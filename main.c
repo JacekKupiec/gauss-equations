@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 	if (argv[2][0] == 's')
 		solutions = solve_with_partial_choose(equations, rows, columns);
 	else if (argv[2][0] == 'p') 
-		solutions = solve_with_partial_choose_parallel(equations,rows, columns);
+		solutions = solve_with_partial_choose_parallel(equations, rows, columns);
 
 	if (solutions == NULL) puts("Brak rozwiązań układu równań");
 
