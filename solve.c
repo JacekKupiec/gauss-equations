@@ -13,6 +13,9 @@ void partial_choose(double **matrix, int rows, int column, int sub_matrix_size) 
 	__assume_aligned(matrix, ALIGNMENT_SIZE);
 #endif
 
+#ifdef NO_DEFAULT_VECTORIZATION
+#pragma novector
+#endif
 	for (i = start, max_v = matrix[start][start]; i < rows; i++)
 		if (matrix[i][start] > max_v) {
 			max_v = matrix[i][start];
@@ -70,7 +73,6 @@ double* solve_with_partial_choose(double **matrix, int rows, int columns) {
 
 	//Postępowanie odwrtone
 	for (i = rows - 1; i >= 0; i--) {
-		//columns - 1 poniewaz nie chc odjemowa� od ... = "liczba" tej�e "liczby" ,kt�ra jest w matrix[i][columns - 1]
 		for (R[i] = matrix[i][columns - 1], j = i + 1; j < columns - 1; j++)
 			R[i] -= matrix[i][j] * R[j];
 
@@ -97,6 +99,9 @@ void partial_choose_parallel(double **matrix, int rows, int columns, int sub_mat
 #pragma omp parallel default(none) shared(matrix, rows, columns, sub_matrix_size, max_v, max_i, start) firstprivate(priv_max_i, priv_max_v) private(i)
 	{
 #pragma omp for schedule(static)
+#ifdef NO_DEFAULT_VECTORIZATION
+#pragma novector
+#endif
 		for (i = start; i < rows; i++) {
 			if (priv_max_v < matrix[i][start]) {
 				priv_max_i = i;
@@ -163,6 +168,9 @@ double* solve_with_partial_choose_parallel(double **matrix, int rows, int column
 
 	//sprawdzam czy istnieją rozwiązania
 #pragma omp parallel for schedule(static) private(i)
+#ifdef NO_DEFAULT_VECTORIZATION
+#pragma novector
+#endif
 	for (i = rows - 1; i >= 0; i--)
 		if (matrix[i][i] == 0 && matrix[i][columns - 1] != 0)
 			illegal = 1; //brak rozwiązań
@@ -181,8 +189,10 @@ double* solve_with_partial_choose_parallel(double **matrix, int rows, int column
 		double sum = 0;
 
 		R[i] = matrix[i][columns - 1];
-		//columns - 1 poniewaz nie chcę odjemować od ... = "liczba" tejże "liczby" ,która jest w matrix[i][columns - 1]
 #pragma omp parallel for schedule(static) private(j) reduction(+:sum)
+#ifdef NO_DEFAULT_VECTORIZATION
+#pragma novector
+#endif
 		for (j = i + 1; j < columns - 1; j++) {
 			sum += matrix[i][j] * R[j];
 		}
