@@ -3,9 +3,9 @@
 #include <assert.h>
 #include <time.h>
 #include <omp.h>
-//#include <string.h>
+#include <string.h>
 #include "shared_consts.h"
-
+#include <varargs.h>
 
 double **LoadEquationMatrix(char *path, int *rows, int *columns) {
 	double **matrix;
