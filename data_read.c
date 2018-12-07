@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <time.h>
 #include <omp.h>
-#include <string.h>
+//#include <string.h>
 #include "shared_consts.h"
 
 
